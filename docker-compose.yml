@@ -1,0 +1,126 @@
+version: "3.7"
+
+services:
+    server:
+        image: bitnami/apache:latest
+        ports:
+            - "80:8080"
+        restart: always
+        volumes:
+            - projects:/var/www/html
+            - ./docker/ini/httpd.conf:/vhosts/vhost.conf:ro
+        networks:
+          - app_network
+
+#    php74-fpm:
+#        container_name: php74-fpm
+#        build:
+#            context: .
+#            dockerfile: docker/php74fpm.Dockerfile
+#            args:
+#                - USER_ID
+#                - GROUP_ID
+#        networks:
+#            - app_network
+#        restart: always
+#        volumes:
+#              - projects:/var/www/html
+#              - ./aliases/php74/bash.bashrc:/etc/bash.bashrc
+#              - ./docker/ini/php74.ini:/usr/local/etc/php/php.ini
+#        environment:
+#            XDEBUG_CONFIG: "client_port=${XDEBUG_PORT} client_host=${XDEBUG_HOST}"
+#            PHP_IDE_CONFIG: "serverName=php74"
+#
+#    php73-fpm:
+#        container_name: php73-fpm
+#        build:
+#            context: .
+#            dockerfile: docker/php73fpm.Dockerfile
+#            args:
+#                - USER_ID
+#                - GROUP_ID
+#        networks:
+#            - app_network
+#        volumes:
+#            - projects:/var/www/html
+#            - ./aliases/php73/bash.bashrc:/etc/bash.bashrc
+#            - ./docker/ini/php73.ini:/usr/local/etc/php/php.ini
+#        environment:
+#          XDEBUG_CONFIG: "client_port=${XDEBUG_PORT} client_host=${XDEBUG_HOST}"
+#          PHP_IDE_CONFIG: "serverName=php73"
+#
+#    php71-fpm:
+#        container_name: php71-fpm
+#        build:
+#            context: .
+#            dockerfile: docker/php71fpm.Dockerfile
+#            args:
+#                - USER_ID
+#                - GROUP_ID
+#        networks:
+#            - app_network
+#        volumes:
+#            - projects:/var/www/html
+#            - ./aliases/php71/bash.bashrc:/etc/bash.bashrc
+#            - ./docker/ini/php71.ini:/usr/local/etc/php/php.ini
+#        environment:
+#            XDEBUG_CONFIG: "client_port=${XDEBUG_PORT} client_host=${XDEBUG_HOST}"
+#            PHP_IDE_CONFIG: "serverName=php71"
+#
+#    php70-fpm:
+#        container_name: php70-fpm
+#        build:
+#            context: .
+#            dockerfile: docker/php70fpm.Dockerfile
+#            args:
+#                - USER_ID
+#                - GROUP_ID
+#        networks:
+#            - app_network
+#        volumes:
+#            - projects:/var/www/html
+#            - ./aliases/php70/bash.bashrc:/etc/bash.bashrc
+#            - ./docker/ini/php70.ini:/usr/local/etc/php/php.ini
+#        environment:
+#            XDEBUG_CONFIG: "remote_port=${XDEBUG_PORT} remote_host=${XDEBUG_HOST}"
+#            PHP_IDE_CONFIG: "serverName=php71"
+
+    php56-fpm:
+        container_name: php56-fpm
+        image: stal463/php-fpm:8.0
+        networks:
+            - app_network
+        volumes:
+            - projects:/var/www/html
+            - ./aliases/php56/bash.bashrc:/etc/bash.bashrc
+#            - ./docker/ini/php56.ini:/usr/local/etc/php/php.ini
+#        ports:
+#            - "9010:9000"
+        environment:
+            XDEBUG_CONFIG: "remote_port=${XDEBUG_PORT} remote_host=${XDEBUG_HOST}"
+            PHP_IDE_CONFIG: "serverName=php56"
+
+    db:
+        image: mariadb:10.4
+        ports:
+             - "${DB_PORT}:3306"
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_PASS}
+            MYSQL_USER: ${DB_USER}
+        volumes: 
+            - ${PATH_DB}:/var/lib/mysql
+        networks:
+            - app_network
+
+volumes:
+    projects:
+        driver: local
+        driver_opts:
+            type: none
+            device: ${PATH_PROJECTS}
+            o: bind
+
+networks:
+    app_network:
+        driver: bridge
